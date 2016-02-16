@@ -11,6 +11,7 @@ import re
 import sys
 
 route="."
+counter=0
 
 
 #Terminal parameter
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     #print route
 
 
-#route= raw_input("Selecciona directorio a renombrar:\n")
+#route= raw_input("Select path:\n")
 route=str(route)
 
 files_list=os.listdir(route)
@@ -48,6 +49,8 @@ for gcode_file in files_list:
 
         if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
 
+            counter=counter+1
+
             string_time=re.search(';Print time: (.+?)minutes',file_string)
 
             if string_time:
@@ -72,3 +75,9 @@ for gcode_file in files_list:
                 os.rename(gcode_file, gcode_file.replace(gcode_file, new_file_name))
             else:
                 os.rename(route+gcode_file, route+gcode_file.replace(gcode_file, new_file_name))
+
+#Finish message
+if counter==0:
+    print("\nScript complete, not renamed gcode files not found\n")
+else:
+    print ("\nScript complete: "+str(counter)+" gcode files renamed\n")
