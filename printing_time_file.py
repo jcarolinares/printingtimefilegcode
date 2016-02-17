@@ -9,6 +9,7 @@ Made by Julian Caro Linares, jcarolinares@gmail.com
 import os
 import re
 import sys
+import gcoder
 
 route="."
 counter=0
@@ -56,15 +57,31 @@ for gcode_file in files_list:
             if string_time:
                 file_string= string_time.group()
 
-            #print (file_string)
+                #print (file_string)
+                file_string=file_string.replace(';Print time: ','')
+                file_string=file_string.replace(' hour ','h')
+                file_string=file_string.replace(' hours ','h')
+                file_string=file_string.replace(' minutes','m')
+                file_string=file_string.replace(' minute','m')
 
-            file_string=file_string.replace(';Print time: ','')
-            file_string=file_string.replace(' hour ','h')
-            file_string=file_string.replace(' hours ','h')
-            file_string=file_string.replace(' minutes','m')
-            file_string=file_string.replace(' minute','m')
+                #print (file_string)
+            else:
+                if route==".":
+                    gcode = gcoder.GCode(open(gcode_file, "rU"))
+                else:
+                    gcode = gcoder.GCode(open(route+gcode_file, "rU"))
 
-            #print (file_string)
+                #print "Estimated duration: %s" % gcode.estimate_duration()[1]
+                #Estimated duration: 0:45:02
+                file_string=str(gcode.estimate_duration()[1])
+                file_string=file_string.replace(':','h',1)
+                file_string=file_string.replace(':','m',1)
+
+
+                #print file_string
+
+                #file_string="0h0m"
+
 
             new_file_name=file_string+'-'+gcode_file
 
