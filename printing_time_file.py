@@ -13,12 +13,21 @@ import gcoder
 
 route="."
 counter=0
-
+after_name=False #Controls the order of the name: XXhXXm-nombre_archivo.gcode or nombre_archivo-XXhXXm.gcode
 
 #Terminal parameter
 if __name__ == '__main__':
-    if len(sys.argv) != 2 or len(sys.argv) == 0:
+
+    #print(len(sys.argv))
+
+    if len(sys.argv) == 1:
         route="."
+    elif len(sys.argv) == 2 and sys.argv[1]=="-after":
+        after_name=True
+        route ="."
+    elif len(sys.argv) == 3 and sys.argv[1]=="-after":
+        after_name=True
+        route = sys.argv[2]
     else:
         route = sys.argv[1]
     #print route
@@ -82,8 +91,12 @@ for gcode_file in files_list:
 
                 #file_string="0h0m"
 
+            if after_name==False:
+                new_file_name=file_string+'-'+gcode_file
+            else:
+                line_string=gcode_file.split(".")
+                new_file_name=line_string[0]+'-'+file_string+'.'+line_string[1]
 
-            new_file_name=file_string+'-'+gcode_file
 
             #print (new_file_name)
 
