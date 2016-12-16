@@ -13,7 +13,7 @@ import gcoder
 
 route="."
 counter=0
-after_name=False #Controls the order of the name: XXhXXm-nombre_archivo.gcode or nombre_archivo-XXhXXm.gcode
+after_name=False #Controls the order of the name: XXhXXm-name_file.gcode or name_file-XXhXXm.gcode
 
 #Terminal parameter
 if __name__ == '__main__':
@@ -53,18 +53,17 @@ for gcode_file in files_list:
 
 
         file_string=file.read()
-        if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
-            file.write("\n; -- renamed with printing_time_file.py - More info in https://github.com/jcarolinares/printingtimefilegcode")
-        file.close()
+
 
         if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
 
             counter=counter+1
 
-            string_time=re.search(';Print time: (.+?)minutes',file_string)
+            string_time_cura=re.search(';Print time: (.+?)minutes',file_string)
+            string_time_simplify=re.search(';   Build time: (.+?) min',file_string)
 
-            if string_time:
-                file_string= string_time.group()
+            if string_time_cura:
+                file_string= string_time_cura.group()
 
                 #print (file_string)
                 file_string=file_string.replace(';Print time: ','')
@@ -73,8 +72,25 @@ for gcode_file in files_list:
                 file_string=file_string.replace(' minutes','m')
                 file_string=file_string.replace(' minute','m')
 
-                #print (file_string)
-            else:
+
+                if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
+                    file.write("\n; -- renamed with printing_time_file.py - More info in https://github.com/jcarolinares/printingtimefilegcode")
+                    file.close()
+
+
+            elif string_time_simplify:
+                file_string=string_time_simplify.group()
+                file_string=file_string.replace(';   Build time: ','')
+                #file_string=file_string.replace(' hour ','h')
+                #file_string=file_string.replace(' hours ','h')
+                file_string=file_string.replace(' min','m')
+                file_string=file_string.replace('.','_')
+
+                if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
+                    file.write("\n; -- renamed with printing_time_file.py - More info in https://github.com/jcarolinares/printingtimefilegcode")
+                    file.close()
+
+            else: #Slic3r or others
                 if route==".":
                     gcode = gcoder.GCode(open(gcode_file, "rU"))
                 else:
@@ -86,6 +102,9 @@ for gcode_file in files_list:
                 file_string=file_string.replace(':','h',1)
                 file_string=file_string.replace(':','m',1)
 
+                if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
+                    file.write("\n; -- renamed with printing_time_file.py - More info in https://github.com/jcarolinares/printingtimefilegcode")
+                    file.close()
 
                 #print file_string
 
