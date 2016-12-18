@@ -11,9 +11,16 @@ import re
 import sys
 import gcoder
 
+#import pdb #Debug library, use pdb.set_trace() in the point that you want to see
+
+
+
 route="."
 counter=0
 after_name=False #Controls the order of the name: XXhXXm-name_file.gcode or name_file-XXhXXm.gcode
+cost_of_print=False #Controls the cost of print option
+print_cost_list=[] #A list with all the cost of print of each object
+total_cost=0 #Total cost of all the objects
 
 #Terminal parameter
 if __name__ == '__main__':
@@ -28,6 +35,13 @@ if __name__ == '__main__':
     elif len(sys.argv) == 3 and sys.argv[1]=="-after":
         after_name=True
         route = sys.argv[2]
+    elif len(sys.argv) == 2 and sys.argv[1]=="-cost":
+        cost_of_print=True
+        route = "."
+    elif len(sys.argv) == 3 and sys.argv[1]=="-cost":
+        cost_of_print=True
+        route = sys.argv[2]
+
     else:
         route = sys.argv[1]
     #print route
@@ -42,7 +56,7 @@ files_list=os.listdir(route)
 #    print x
 
 for gcode_file in files_list:
-    if re.search('.gcode',gcode_file):
+    if re.search('\.gcode',gcode_file):
         #print (route+gcode_file)
 
         #Reading the file
@@ -61,8 +75,11 @@ for gcode_file in files_list:
 
             string_time_cura=re.search(';Print time: (.+?)minutes',file_string)
             string_time_simplify=re.search(';   Build time: (.+?) min',file_string)
+            string_cost_cura=re.search(';Filament cost: (.+?)\n',file_string)
+            string_cost_simplify=re.search(';   Material cost: \$(.+?) ',file_string)
 
             if string_time_cura:
+
                 file_string= string_time_cura.group()
 
                 #print (file_string)
@@ -72,6 +89,19 @@ for gcode_file in files_list:
                 file_string=file_string.replace(' minutes','m')
                 file_string=file_string.replace(' minute','m')
 
+                #Cost of printing
+                #;Filament cost: 0.35 #cura gcode comment
+                if cost_of_print==True:
+
+                    if string_cost_cura:
+                        print_cost=string_cost_cura.group()
+                        print_cost=print_cost.replace(';Filament cost: ','')
+
+                        if "None" in gcode_file:
+                            print("The file "+gcode_file+" doesn't have an estimated price")
+                        else:
+                            print_cost=float(print_cost)
+                            print_cost_list.append(print_cost)#Add the price to the files costs list
 
                 if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
                     file.write("\n; -- renamed with printing_time_file.py - More info in https://github.com/jcarolinares/printingtimefilegcode")
@@ -79,12 +109,26 @@ for gcode_file in files_list:
 
 
             elif string_time_simplify:
+
                 file_string=string_time_simplify.group()
                 file_string=file_string.replace(';   Build time: ','')
                 #file_string=file_string.replace(' hour ','h')
                 #file_string=file_string.replace(' hours ','h')
                 file_string=file_string.replace(' min','m')
                 file_string=file_string.replace('.','_')
+
+                if cost_of_print==True:
+                    #pdb.set_trace()
+                    if string_cost_simplify:
+                        print_cost=string_cost_simplify.group()
+                        print_cost=print_cost.replace(';   Material cost: $','')
+
+                        if "None" in gcode_file:
+                            print("The file "+gcode_file+" doesn't have an estimated price")
+                        else:
+                            print_cost=float(print_cost)
+                            print_cost_list.append(print_cost)#Add the price to the files costs list
+
 
                 if not re.search('; -- renamed with printing_time_file.py',file_string): #If file hasn't been renamed before
                     file.write("\n; -- renamed with printing_time_file.py - More info in https://github.com/jcarolinares/printingtimefilegcode")
@@ -125,8 +169,16 @@ for gcode_file in files_list:
             else:
                 os.rename(route+gcode_file, route+gcode_file.replace(gcode_file, new_file_name))
 
+
+#Cost sum
+if cost_of_print==True:
+    total_cost=sum(print_cost_list)
+
 #Finish message
 if counter==0:
     print("\nScript complete, not renamed gcode files not found\n")
+
 else:
     print ("\nScript complete: "+str(counter)+" gcode files renamed\n")
+    if cost_of_print==True:
+        print("Total cost of "+str(counter)+" renamed files: "+str(total_cost)+" $")
