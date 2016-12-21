@@ -6,7 +6,7 @@ This is very useful when you plan some gcodes inside your 3D printer and, some m
 
 
 
-<a href="https://www.youtube.com/embed/QMcQnE6nsbU" target="blank"><img src="http://img.youtube.com/vi/QMcQnE6nsbU/0.jpg" alt="Video" width="240" height="180" border="10"/ ></a>
+<center><a href="https://www.youtube.com/embed/QMcQnE6nsbU" target="_blank"><img src="http://img.youtube.com/vi/QMcQnE6nsbU/0.jpg" alt="Video" width="480" height="360" border="10"/ ></a></center>
 
 Made by Julian Caro Linares: jcarolinares@gmail.com
 
